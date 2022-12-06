@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include <QEvent>
-//#include "C:\Users\RPlsicik\Documents\GitHub\USB2CAN_driver/usb2can_driver.h"
-#include "C:\Users\RPlsicik\Documents\GitHub\USB2CAN_driver/usb2can_driver.h"
+
+#include "usb2can_driver.h"
 #include "QByteArray"
 #include "QSerialPortInfo"
 #include "deque"

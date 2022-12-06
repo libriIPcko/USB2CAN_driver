@@ -11,14 +11,14 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../../usb2can_driver.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    usb2can_driver.cpp
 
 HEADERS += \
-    ../../USB2CAN_define.h \
-    ../../usb2can_driver.h \
-    mainwindow.h
+    USB2CAN_define.h \
+    mainwindow.h \
+    usb2can_driver.h
 
 FORMS += \
     mainwindow.ui
