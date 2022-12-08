@@ -236,7 +236,13 @@ QByteArray USB2CAN_driver::read_USB2CAN(){
 }
 
 int USB2CAN_driver::writeCANmsg(QString msg){
+
+    if(msg.at(0) == '/'){
+        msg.remove(0,1);
+        qDebug() << msg;
+    }
     QStringList inDat = msg.split("/");
+
     if(inDat.length() < 2){
         //Giver return = 999;
         return 999; // BAD syntax
@@ -249,7 +255,7 @@ int USB2CAN_driver::writeCANmsg(QString msg){
     QByteArray suffixDat = QByteArray::fromRawData((char*)suffixRawDat,2);
     QByteArray outDat;
 
-    QByteArray CAN_DATA = QByteArray::fromHex(inDat.at(2).toLocal8Bit());
+    QByteArray CAN_DATA = QByteArray::fromHex(inDat.at(1).toLocal8Bit());
     //Emergency if. If data set of CAN data is odd
     /*
     if((inDat.at(2).size()%2 != 0)&&(inDat.at(2) != 1)){
@@ -266,7 +272,7 @@ int USB2CAN_driver::writeCANmsg(QString msg){
     //outDat.append(length.at(length.length()-1));
     outDat.append(length);
 
-    int CAN_ID_dec = inDat.at(1).toUInt(&ok,16);
+    int CAN_ID_dec = inDat.at(0).toUInt(&ok,16);
     //recalculate CAN_ID
     CAN_ID_dec = (CAN_ID_dec)/0.03125;
 

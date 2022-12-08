@@ -302,8 +302,9 @@ void MainWindow::on_radioButton_toggled(bool checked)
                                        ID_+"/"+operation_mode_5};
 
         //ui->dial_position.
-        for(int i = 1;i<=4;i++){
-            u2c->writeCANmsg(activation_array[i]);
+        for(int i = 0;i<=4;i++){
+            qDebug() << activation_array[i];
+            u2c->writeCANmsg(activation_array[i]);  //writeCANmsg list send add to the driver class
         }
     }
     else{
