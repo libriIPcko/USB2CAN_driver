@@ -34,6 +34,9 @@ private:
 
     void menu_sendCommands(QString cmd);
 
+    //new variable
+    int dial_position;
+
 public: signals:
     void timeout();
     void readyRead();
@@ -49,5 +52,7 @@ private slots:
     void on_pushButton_RX_clean_released();
     void on_pushButton_TX_clean_released();
     void on_pushButton_showDev_released();
+    void on_radioButton_toggled(bool checked);
+    void on_dial_position_valueChanged(int value);
 };
 #endif // MAINWINDOW_H

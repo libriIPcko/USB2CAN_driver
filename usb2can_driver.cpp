@@ -128,7 +128,7 @@ int USB2CAN_driver::init(){
         activeInit = true;
         temporary_init_Counter = 0;
         connect(initListTimer,SIGNAL(timeout()),this,SLOT(initSend()));
-        initSend();
+        //initSend();
         initListTimer->setTimerType(Qt::PreciseTimer);
         initListTimer->start(initTimerDelay);
 
@@ -431,32 +431,36 @@ bool USB2CAN_driver::initSend(){
             }
             initListTimer->start(initTimerDelay);
         break;
-        case 11:              //9-Set Normal Mode
+        case 11:              //9-Set Mode register [0x00], the value depends on Message Filter   (by WriteReg[x12])
             while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                status = port_USB2CAN->write(NormalMode,3);
-                qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "NormalMode"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 12:              //10-Set Mode register [0x00], the value depends on Message Filter   (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                status = port_USB2CAN->write(ModRegDat,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(NormalMode) << "Status" << status << "ModRegDat - final"<< temporary_init_Counter;
+                status = port_USB2CAN->write(NormalMode,5);
+                qDebug() << "TX:" << QString::fromLocal8Bit(NormalMode) << "Status" << status << "NormalMode"<< temporary_init_Counter;
 
             }
             initListTimer->start(initTimerDelay);
         break;
+        case 12:              //10-Set Normal Mode
+            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                status = port_USB2CAN->write(ModRegDat,3);
+                qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "ModRegDat - final"<< temporary_init_Counter;
+            }
+            initListTimer->start(initTimerDelay);
+        break;
+
         case 13:              //End of Initialize sub-routine
+            initListTimer->stop();
             stop = true;
             temporary_init_Counter = 0;
             activeInit = false;
-            initListTimer->stop();
+
+            /*
             while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
                 status = port_USB2CAN->write(NormalMode,3);
                 qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "NormalMode"<< temporary_init_Counter;
             }
             qDebug() << QObject::disconnect(initListTimer);
             qDebug() << "initTimer is active? " << initListTimer->isActive();
+            */
             //return true;
         break;
         default:

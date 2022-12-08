@@ -280,3 +280,59 @@ void MainWindow::infoCOM(){
         }
     }
 }
+
+void MainWindow::on_radioButton_toggled(bool checked)
+{
+    //Motor activation, send
+    if(checked == true){
+        ui->dial_position->setVisible(checked);
+        //Activation of motor
+        QString ID_PPmode = "701";
+        QString ID_ = "601";
+        QString start_1 = "0100";
+        QString switch_OFF_2 = "2B40600000000000";
+        QString ready_mode_3 = "2B40600007";
+        QString switch_ON_4 =  "2B4060000F";
+        QString operation_mode_5 = "2B4060000F";
+
+        QString activation_array[5] = {ID_PPmode+"/"+start_1,
+                                       ID_+"/"+switch_OFF_2,
+                                       ID_+"/"+ready_mode_3,
+                                       ID_+"/"+switch_ON_4,
+                                       ID_+"/"+operation_mode_5};
+
+        //ui->dial_position.
+        for(int i = 1;i<=4;i++){
+            u2c->writeCANmsg(activation_array[i]);
+        }
+    }
+    else{
+        ui->dial_position->setVisible(checked);
+    }
+}
+
+
+void MainWindow::on_dial_position_valueChanged(int value){
+
+    QString prepareForStart = "2B4060001F000000";
+    QString activationOfStart = "2B4060000F000000";
+    QString ID_ = "601";
+    QString set_position = "237A6000";
+    //QString set_position = "237A6000AABB0000";
+
+
+    ui->lcdNumber->display(value);
+    dial_position = value;
+    //QByteArray val = QByteArray::fromHex(QString::number(dial_position));
+    QString hexvalue = QString("%1").arg(dial_position, 8, 16, QLatin1Char( '0' ));
+    std::reverse_copy(hexvalue.constBegin(),hexvalue.constEnd(),hexvalue.begin());
+    hexvalue.remove(6,hexvalue.size());
+    hexvalue.append("00");
+    set_position.append(hexvalue);
+    ui->RX_textEdit->setText(hexvalue);
+    QString Mov[5] = {ID_+"/"+set_position,
+                     ID_+"/"+prepareForStart,
+                     ID_+"/"+activationOfStart};
+    //QString val = QString::number(dial_position);
+}
+

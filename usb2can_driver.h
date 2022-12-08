@@ -22,7 +22,7 @@ public:
     QTimer *ListTimer = new QTimer();
     QTimer *initListTimer = new QTimer();
     QTimer *deinitListTimer = new QTimer();
-    int initTimerDelay = 500;
+    int initTimerDelay = 700;
     QTimer *tim;
     int tim_counter = 0;
 
