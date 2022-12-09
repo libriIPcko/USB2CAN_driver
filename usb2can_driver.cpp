@@ -328,24 +328,6 @@ bool USB2CAN_driver::initSend(){
                 qDebug() << "TX:" << QString::fromLocal8Bit(Config) << "Status" << status << "Config" << temporary_init_Counter;
             }
             initListTimer->start(initTimerDelay);
-                /*
-                //USB2CAN_driver::write(Config,qstrlen(Config));
-                bool ok = false;
-                int cycle = 0;
-                while(ok == true){
-                    status = port_USB2CAN->write(Config,3);
-                    while(!port_USB2CAN->waitForReadyRead(5)){
-                        if((strcmp(port_USB2CAN->readAll(),"FF"))==1){
-                                ok = true;
-                        }
-                        if(cycle >= 4){
-                            ok = true;
-                        }
-                        qDebug() << cycle++;
-                    }
-                }
-            }
-            */
         break;
         case 1:                    //2-Set Reset Mode [0x00]on value 0x01   (by WriteReg[x12])
             while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
@@ -450,6 +432,7 @@ bool USB2CAN_driver::initSend(){
                 status = port_USB2CAN->write(ModRegDat,3);
                 qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "ModRegDat - final"<< temporary_init_Counter;
             }
+            activeInit = false;
             initListTimer->start(initTimerDelay);
         break;
 
@@ -457,17 +440,7 @@ bool USB2CAN_driver::initSend(){
             initListTimer->stop();
             stop = true;
             temporary_init_Counter = 0;
-            activeInit = false;
-
-            /*
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                status = port_USB2CAN->write(NormalMode,3);
-                qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "NormalMode"<< temporary_init_Counter;
-            }
-            qDebug() << QObject::disconnect(initListTimer);
-            qDebug() << "initTimer is active? " << initListTimer->isActive();
-            */
-            //return true;
+            //activeInit = false;
         break;
         default:
             qDebug() << "ERROR init !! case" << temporary_init_Counter;
@@ -476,7 +449,8 @@ bool USB2CAN_driver::initSend(){
     }
 
     if(stop == true){        
-        initListTimer->stop();        
+        activeInit = false;
+        initListTimer->stop();
         QObject::disconnect(initListTimer);
         //temporary_init_Counter = 0;
         return true;
