@@ -25,6 +25,8 @@ public:
     int initTimerDelay = 700;
     QTimer *tim;
     int tim_counter = 0;
+    QTimer *ListCANmsgSend = new QTimer();
+    int counter_listCANmsg_slot = 0;
 
     int temporary_init_Counter = 0;
     int deinit_Counter = 0;
@@ -47,6 +49,7 @@ public:
     int SendHex(QByteArray data);
 
     int writeCANmsg(QString msg);
+    int listCANmsg(QStringList list,int msgDelay);
     void writeCANmsg(QByteArray msg);
 
     //QString portName;
@@ -83,6 +86,7 @@ private slots:
     bool initSend();
     void initSend_1();
     bool deinitSend();
+    int listCANmsg_slot(QStringList list);
 };
 
 #endif // USB2CAN_DRIVER_H

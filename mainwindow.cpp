@@ -155,6 +155,26 @@ void MainWindow::on_pushButton_ListSendBtn_released(){
     listSendTimer->start();
 }
 
+void MainWindow::..() {
+    QString inputTXT = ui->TX_textEdit->toPlainText();
+    QString temp;
+    QStringList outputList;
+    //read from GUI
+    for(int i=0; i < inputTXT.length();i++){
+        if(inputTXT.at(i) == '\n'){
+            outputTxt_string.append(inputTXT.at(i));
+            outputTxt.push_back(outputTxt_string);
+            outputTxt_string.clear();
+        }
+        else{
+            outputTxt_string.append(temp.at(i));
+        }
+    }
+    //clear syntax
+    //put the list to output
+
+}
+
 void MainWindow::on_timeout_listSendTimer(){
     if(outputTxt.size() == 0){
         listSendTimer->stop();

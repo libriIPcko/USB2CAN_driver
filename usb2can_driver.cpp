@@ -489,3 +489,22 @@ void USB2CAN_driver::initSend_1(){
        initListTimer->disconnect();
    }
 }
+
+int  USB2CAN_driver::listCANmsg(QStringList list,int msgDelay){
+    //writeCANmsg();
+    ListCANmsgSend->setInterval(msgDelay);
+    connect(ListCANmsgSend,SIGNAL(timeout()),this,SLOT(listCANmsg_slot(list)));
+    ListCANmsgSend->start();
+}
+
+int USB2CAN_driver::listCANmsg_slot(QStringList list){
+    ListCANmsgSend->stop();
+    if(counter_listCANmsg_slot > list.length()){
+        counter_listCANmsg_slot = 0;
+        return 0;
+    }
+    writeCANmsg(list.at(counter_listCANmsg_slot));
+    ListCANmsgSend->start();
+    counter_listCANmsg_slot++;
+    return counter_listCANmsg_slot;
+}
