@@ -154,7 +154,7 @@ void MainWindow::on_pushButton_ListSendBtn_released(){
     listSendTimer->setInterval(ui->lineEdit_lineEdit_timdelaylist->text().toInt());
     listSendTimer->start();
 }
-
+/*
 void MainWindow::..() {
     QString inputTXT = ui->TX_textEdit->toPlainText();
     QString temp;
@@ -174,7 +174,7 @@ void MainWindow::..() {
     //put the list to output
 
 }
-
+*/
 void MainWindow::on_timeout_listSendTimer(){
     if(outputTxt.size() == 0){
         listSendTimer->stop();
