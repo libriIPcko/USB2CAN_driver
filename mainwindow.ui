@@ -179,8 +179,8 @@
      <widget class="QPushButton" name="pushButton_showDev">
       <property name="geometry">
        <rect>
-        <x>488</x>
-        <y>18</y>
+        <x>40</x>
+        <y>280</y>
         <width>75</width>
         <height>20</height>
        </rect>
@@ -195,8 +195,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>20</y>
+        <x>690</x>
+        <y>0</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -268,6 +268,32 @@
       </property>
       <property name="textFormat">
        <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_baudrate">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>0</y>
+        <width>81</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>BaudRate</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_baudrate">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>20</y>
+        <width>113</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>9600</string>
       </property>
      </widget>
     </widget>

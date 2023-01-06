@@ -93,7 +93,9 @@ void MainWindow::on_pushButton_released(){
     connectButton = !connectButton;
     if(connectButton == true){
         ui->pushButton->setText("Connected");
-        u2c->connectToPort(ui->lineEdit->text(),9600);           //COM5
+        ui->RX_textEdit->append(QString::number(ui->lineEdit_baudrate->text().toInt()));
+
+        u2c->connectToPort(ui->lineEdit->text(),ui->lineEdit_baudrate->text().toInt());           //COM5
         if(u2c->port_USB2CAN->isOpen()){
             qDebug() << "port is open? "<< u2c->port_USB2CAN->isOpen() << "Port name:" << ui->lineEdit->text();
         }
