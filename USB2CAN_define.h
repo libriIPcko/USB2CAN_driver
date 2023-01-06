@@ -28,7 +28,7 @@
 
 static const char Config[] =        {'\x0f',    '\x02', '\x00'                         };
 static const char ResetMod[] =      {'\x0f',    '\x12', '\x02', '\x00', '\x01'         };
-static const char ClockDivData[] =  {'\x0f',    '\x12', '\x02', '\x1F', '\xC0'         };   //Clock divider
+static const char ClockDivData[] =  {'\x0f',    '\x12', '\x02', '\x1F', '\xc1'         };   //Clock divider xc0
 static const char AccCode[] =       {'\x0f',    '\x12', '\x02', '\x10', '\x00'         };   //0x00  without filtration CAN adress
 static const char AccMask[] =       {'\x0f',    '\x12', '\x02', '\x14', '\xff'         };   //0ff   without filtratio CAN adress
 static const char OutCtrl[] =       {'\x0f',    '\x12', '\x02', '\x08', '\xDA'         };

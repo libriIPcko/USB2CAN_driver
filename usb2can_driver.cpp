@@ -127,6 +127,7 @@ int USB2CAN_driver::init(){
     //Init CMD by timer period
         activeInit = true;
         temporary_init_Counter = 0;
+        init_send_stop = false;
         connect(initListTimer,SIGNAL(timeout()),this,SLOT(initSend()));
         //initSend();
         initListTimer->setTimerType(Qt::PreciseTimer);
@@ -316,148 +317,155 @@ bool USB2CAN_driver::deinitSend(){
 }
 
 bool USB2CAN_driver::initSend(){
-     bool stop = false;
+    bool stop = init_send_stop;
     qDebug() << "case" << temporary_init_Counter << "time: " << initListTimer->remainingTime();
     initListTimer->stop();
     int waitForBytesWritten = 200;
     int status;
-    switch (temporary_init_Counter){
-        case 0:                     //1-Set to Config Mode [0x02]
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                status = port_USB2CAN->write(Config,3);
-                qDebug() << "TX:" << QString::fromLocal8Bit(Config) << "Status" << status << "Config" << temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 1:                    //2-Set Reset Mode [0x00]on value 0x01   (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(ResetMod);
-                //USB2CAN_driver::write(ResetMod,qstrlen(ResetMod));
-                status = port_USB2CAN->write(ResetMod,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(ResetMod) << "Status" << status << "ResetMod"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 2:                    //3-Set Clock divider [0x1F] on value 0xC0 (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(ClockDivData);
-                //USB2CAN_driver::write(ClockDivData,qstrlen(ClockDivData));
-                status = port_USB2CAN->write(ClockDivData,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(ClockDivData) << "Status" << status << "ClockDivData"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 3:                    //4.1-Set message filter; without filtration: (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(AccCode);
-                //USB2CAN_driver::write(AccCode,qstrlen(AccCode));
-                status = port_USB2CAN->write(AccCode,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(AccCode) << "Status" << status << "AccCode"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 4:                    //4.2 set-> Acceptance Mask [0x05] on 0xff
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(AccMask);
-                //USB2CAN_driver::write(AccMask,qstrlen(AccMask));
-                status = port_USB2CAN->write(AccMask,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(AccMask) << "Status" << status << "AccMask"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 5:                   //5-Set OutputControl[0x08] on 0xDA (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(OutCtrl);
-                //USB2CAN_driver::write(OutCtrl),qstrlen(OutCtrl);
-                status = port_USB2CAN->write(OutCtrl,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(OutCtrl) << "Status" << status << "OutCtrl"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 6:                  //7. -Set Interrupt enable[]  on 0x03  (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(IE);
-                //USB2CAN_driver::write(IE,qstrlen(IE));
-                status = port_USB2CAN->write(IE,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(IE) << "Status" << status << "IE"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 7:                 //6.1 - Bus Timing 0
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(BT0);
-                //USB2CAN_driver::write(BT0,qstrlen(BT0));
-                status = port_USB2CAN->write(BT0,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(BT0) << "Status" << status << "BT0"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 8:                 //6.2 - Bus Timing 1
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(BT1);
-                //USB2CAN_driver::write(BT1,qstrlen(BT1));
-                status = port_USB2CAN->write(BT1,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(BT1) << "Status" << status << "BT1"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 9:                 //8.1 -Set Transmit Critical Limit and Transmit Ready limit by cmd COMMAND TCL
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(CTL_Code);
-                //USB2CAN_driver::write(CTL_Code,qstrlen(CTL_Code));
-                status = port_USB2CAN->write(CTL_Code,4);
-                qDebug() << "TX:" << QString::fromLocal8Bit(CTL_Code) << "Status" << status << "CTL_Code"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 10:               //8.2 Set-> TRL
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                //USB2CAN_driver::write(TRL_Code);
-                //USB2CAN_driver::write(TRL_Code,qstrlen(TRL_Code));
-                status = port_USB2CAN->write(TRL_Code,4);
-                qDebug() << "TX:" << QString::fromLocal8Bit(TRL_Code) << "Status" << status << "TRL_Code"<< temporary_init_Counter;
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 11:              //9-Set Mode register [0x00], the value depends on Message Filter   (by WriteReg[x12])
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                status = port_USB2CAN->write(NormalMode,5);
-                qDebug() << "TX:" << QString::fromLocal8Bit(NormalMode) << "Status" << status << "NormalMode"<< temporary_init_Counter;
-
-            }
-            initListTimer->start(initTimerDelay);
-        break;
-        case 12:              //10-Set Normal Mode
-            while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
-                status = port_USB2CAN->write(ModRegDat,3);
-                qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "ModRegDat - final"<< temporary_init_Counter;
-            }
-            activeInit = false;
-            initListTimer->start(initTimerDelay);
-        break;
-
-        case 13:              //End of Initialize sub-routine
-            initListTimer->stop();
-            stop = true;
-            temporary_init_Counter = 0;
-            //activeInit = false;
-        break;
-        default:
-            qDebug() << "ERROR init !! case" << temporary_init_Counter;
-            return false;
-        break;
-    }
-
     if(stop == true){        
         activeInit = false;
         initListTimer->stop();
         QObject::disconnect(initListTimer);
-        //temporary_init_Counter = 0;
         return true;
     }
     else{
-        temporary_init_Counter++;
-        return false;
+        switch (temporary_init_Counter){
+            case 0:                     //1-Set to Config Mode [0x02]
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    status = port_USB2CAN->write(Config,3);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(Config) << "Status" << status << "Config" << temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 1:                    //2-Set Reset Mode [0x00]on value 0x01   (by WriteReg[x12])
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(ResetMod);
+                    //USB2CAN_driver::write(ResetMod,qstrlen(ResetMod));
+                    status = port_USB2CAN->write(ResetMod,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(ResetMod) << "Status" << status << "ResetMod"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 2:                    //3-Set Clock divider [0x1F] on value 0xC0 (by WriteReg[x12])
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(ClockDivData);
+                    //USB2CAN_driver::write(ClockDivData,qstrlen(ClockDivData));
+                    status = port_USB2CAN->write(ClockDivData,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(ClockDivData) << "Status" << status << "ClockDivData"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 3:                    //4.1-Set message filter; without filtration: (by WriteReg[x12])
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(AccCode);
+                    //USB2CAN_driver::write(AccCode,qstrlen(AccCode));
+                    status = port_USB2CAN->write(AccCode,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(AccCode) << "Status" << status << "AccCode"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 4:                    //4.2 set-> Acceptance Mask [0x05] on 0xff
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(AccMask);
+                    //USB2CAN_driver::write(AccMask,qstrlen(AccMask));
+                    status = port_USB2CAN->write(AccMask,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(AccMask) << "Status" << status << "AccMask"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 5:                   //5-Set OutputControl[0x08] on 0xDA (by WriteReg[x12])
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(OutCtrl);
+                    //USB2CAN_driver::write(OutCtrl),qstrlen(OutCtrl);
+                    status = port_USB2CAN->write(OutCtrl,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(OutCtrl) << "Status" << status << "OutCtrl"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 6:                  //7. -Set Interrupt enable[]  on 0x03  (by WriteReg[x12])
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(IE);
+                    //USB2CAN_driver::write(IE,qstrlen(IE));
+                    status = port_USB2CAN->write(IE,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(IE) << "Status" << status << "IE"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 7:                 //6.1 - Bus Timing 0
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(BT0);
+                    //USB2CAN_driver::write(BT0,qstrlen(BT0));
+                    status = port_USB2CAN->write(BT0,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(BT0) << "Status" << status << "BT0"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 8:                 //6.2 - Bus Timing 1
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(BT1);
+                    //USB2CAN_driver::write(BT1,qstrlen(BT1));
+                    status = port_USB2CAN->write(BT1,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(BT1) << "Status" << status << "BT1"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 9:                 //8.1 -Set Transmit Critical Limit and Transmit Ready limit by cmd COMMAND TCL
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(CTL_Code);
+                    //USB2CAN_driver::write(CTL_Code,qstrlen(CTL_Code));
+                    status = port_USB2CAN->write(CTL_Code,4);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(CTL_Code) << "Status" << status << "CTL_Code"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 10:               //8.2 Set-> TRL
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    //USB2CAN_driver::write(TRL_Code);
+                    //USB2CAN_driver::write(TRL_Code,qstrlen(TRL_Code));
+                    status = port_USB2CAN->write(TRL_Code,4);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(TRL_Code) << "Status" << status << "TRL_Code"<< temporary_init_Counter;
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 11:              //9-Set Mode register [0x00], the value depends on Message Filter   (by WriteReg[x12])
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    status = port_USB2CAN->write(NormalMode,3);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(NormalMode) << "Status" << status << "NormalMode"<< temporary_init_Counter;
+
+                }
+                initListTimer->start(initTimerDelay);
+            break;
+            case 12:              //10-Set Normal Mode
+                while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
+                    status = port_USB2CAN->write(ModRegDat,5);
+                    qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "ModRegDat - final"<< temporary_init_Counter;
+                }
+                activeInit = false;
+                initListTimer->start(initTimerDelay);
+            break;
+
+            case 13:              //End of Initialize sub-routine
+                qDebug() << "Succesfull initialization";
+
+                return false;
+            break;
+            default:
+                qDebug() << "ERROR init !! case" << temporary_init_Counter;
+                return false;
+            break;
+        }
+
+        if(temporary_init_Counter == 13){
+            temporary_init_Counter = 0;
+            activeInit = false;
+            init_send_stop = true;
+            initListTimer->stop();
+            QObject::disconnect(initListTimer);
+        }
+        else{
+            temporary_init_Counter++;
+        }
+
     }
 
 

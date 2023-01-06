@@ -33,6 +33,7 @@ public:
     int init();
     void deinit();
     int init_test();
+    bool init_send_stop = false;
     bool activeInit = false;
     bool active_init_test = false;
     void USB_LoopBack();
