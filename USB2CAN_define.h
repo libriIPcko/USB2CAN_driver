@@ -40,6 +40,11 @@ static const char TRL_Code[] =      {'\x0f',    '\x20', '\x02', '\x01'          
 static const char NormalMode[] =    {'\x0f',    '\x03', '\x00'                         };   //Set Normal mod
 static const char ModRegDat[] =     {'\x0f',    '\x12', '\x02', '\x00', '\x00'         };   //withou filtration message 0x00
                                                                                             //value is dependent on msg filtration
+static const char boot_Mode[] =         {'\x0f', '\x01', '\x00'};
+static const char loopBack_Mode[] =     {'\x0f', '\x04', '\x00'};
+static const char loopBack_USB_Mode[] = {'\x0f', '\x04', '\x00'};
+static const char get_Mode[] =          {'\x0f', '\x00', '\x00'};
+
 //BusTiming0Reg = SJW_MB_24 | Presc_MB_24;
 //BusTiming1Reg = TSEG2_MB_24 | TSEG1_MB_24;
 //SJA1000 Clock frequency 24MHz 6-24MHz

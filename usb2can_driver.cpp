@@ -62,19 +62,34 @@ int USB2CAN_driver::disconnectedFromPort(){
 
 
 void USB2CAN_driver::USB_LoopBack(){
+    while(!port_USB2CAN->waitForBytesWritten(300)){
+        port_USB2CAN->write(loopBack_USB_Mode,3);
+    }
 }
 void USB2CAN_driver::Boot_Mode(){
+    while(!port_USB2CAN->waitForBytesWritten(300)){
+        port_USB2CAN->write(boot_Mode,3);
+    }
 }
 void USB2CAN_driver::Config_Mode(){
+    while(!port_USB2CAN->waitForBytesWritten(300)){
+        port_USB2CAN->write(Config,3);
+    }
 }
 void USB2CAN_driver::Normal_Mode(){
+    while(!port_USB2CAN->waitForBytesWritten(300)){
+        port_USB2CAN->write(NormalMode,3);
+    }
 }
 void USB2CAN_driver::LoopBack_Mode(){
+    while(!port_USB2CAN->waitForBytesWritten(300)){
+        port_USB2CAN->write(loopBack_Mode,3);
+    }
 }
 
 QByteArray USB2CAN_driver::Get_Mode(){
     while(!port_USB2CAN->waitForBytesWritten(300)){
-        port_USB2CAN->write(getMode);
+        port_USB2CAN->write(getMode,3);
     }
     return USB2CAN_driver::readAll();
 }
@@ -113,7 +128,15 @@ int USB2CAN_driver::SendString(QString data){
 }
 int USB2CAN_driver::SendHex(QByteArray data){
     long length;
+    //For Debug
+    QFile file("C:/Program Files (x86)/BEL/Realterm/Files/CANmsg sent/sent1.txt");
+    file.open(QIODevice::Append);
+    file.write(data);
+    file.write("\n");
+    file.close();
     while(!port_USB2CAN->waitForBytesWritten(300)){
+        qDebug() << data;
+        //here
         length = port_USB2CAN->write(data);
     }
     return length;
@@ -285,7 +308,7 @@ int USB2CAN_driver::writeCANmsg(QString msg){
     outDat.append(CAN_DATA);
     outDat.append(suffixDat);
     //qDebug() <<CAN_ID_dec << QString(QByteArray::fromHex(outDat));
-    SendHex(outDat);
+    qDebug() <<SendHex(outDat);
     return 0;
 }
 

@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow){
     ui->setupUi(this);
     listSendTimer = new QTimer();
-    connect(listSendTimer,SIGNAL(timeout()),this,SLOT(on_timeout_listSendTimer()));
+    qDebug() << connect(listSendTimer,SIGNAL(timeout()),this,SLOT(on_timeout_listSendTimer()));
     u2c = new USB2CAN_driver();
 
     ui->label_3->setVisible(false);
@@ -183,6 +183,7 @@ void MainWindow::on_timeout_listSendTimer(){
     }
     else{
         //u2c->SendHex(QByteArray::fromHex(outputTxt.front().toLocal8Bit()));
+        //menu_sendCommands(outputTxt.front().toLocal8Bit().sliced(1));
         menu_sendCommands(outputTxt.front().toLocal8Bit().sliced(1));
         outputTxt.pop_front();
     }
@@ -209,6 +210,14 @@ void MainWindow::menu_sendCommands(QString cmd){
         else if(cmd.compare("deinit") == 0){
             qDebug() << "Start init" << cmd;
             u2c->deinit();
+        }
+        else if(cmd.compare("boot") == 0){
+            qDebug() << "Set boot mode" << cmd;
+            u2c->Boot_Mode();
+        }
+        else if(cmd.compare("config") == 0){
+            qDebug() << "Set config mode" << cmd;
+            u2c->Config_Mode();
         }
         else if(cmd.sliced(0,1).compare("w") == 0){
             if(cmd.size() >= 4){
@@ -357,5 +366,11 @@ void MainWindow::on_dial_position_valueChanged(int value){
                      ID_+"/"+prepareForStart,
                      ID_+"/"+activationOfStart};
     //QString val = QString::number(dial_position);
+}
+
+
+void MainWindow::on_pushButton_2_released()
+{
+    u2c->Get_Mode();
 }
 

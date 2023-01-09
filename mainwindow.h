@@ -54,5 +54,6 @@ private slots:
     void on_pushButton_showDev_released();
     void on_radioButton_toggled(bool checked);
     void on_dial_position_valueChanged(int value);
+    void on_pushButton_2_released();
 };
 #endif // MAINWINDOW_H
