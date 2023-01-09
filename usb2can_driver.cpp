@@ -87,11 +87,10 @@ void USB2CAN_driver::LoopBack_Mode(){
     }
 }
 
-QByteArray USB2CAN_driver::Get_Mode(){
+void USB2CAN_driver::Get_Mode(){
     while(!port_USB2CAN->waitForBytesWritten(300)){
         port_USB2CAN->write(getMode,3);
-    }
-    return USB2CAN_driver::readAll();
+    }    
 }
 
 void USB2CAN_driver::WriteReg(QByteArray regAdress, QByteArray value){
@@ -188,6 +187,7 @@ QByteArray USB2CAN_driver::read_USB2CAN(){
         //qDebug()<< "filtered\n";
         msgCounter = 0;
         correctInit = true;
+        temporary.clear();
     }
 
     //All other readed datas
@@ -236,11 +236,26 @@ QByteArray USB2CAN_driver::read_USB2CAN(){
         //Correct
         if(activeInit == true){
             initListTimer->stop();
+            //char typeOfMode = temporary.at(temporary.size());
+
+            //if(typeOfMode != '2'){
+            if(temporary.compare("\017\006\001\003") != 0 && temporary_init_Counter == 13){
+                temporary_init_Counter = 13;
+                counter_typeOfMode++;
+                Normal_Mode();
+                //emit dataReceived(temporary.toHex('\0'));
+            }
+            else if(temporary_init_Counter == 13){
+                temporary_init_Counter = 14;
+            }
             initSend();
+            /*
             if(activeInit == true){
+                temporary_init_Counter++;
                 initListTimer->setTimerType(Qt::PreciseTimer);
                 initListTimer->start(initTimerDelay);
             }
+            */
         }
         //for init sub-rutine
         //New initialize subrutine
@@ -450,7 +465,7 @@ bool USB2CAN_driver::initSend(){
                 }
                 initListTimer->start(initTimerDelay);
             break;
-            case 11:              //9-Set Mode register [0x00], the value depends on Message Filter   (by WriteReg[x12])
+            case 11:              //9-Set Normal Mode
                 while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
                     status = port_USB2CAN->write(NormalMode,3);
                     qDebug() << "TX:" << QString::fromLocal8Bit(NormalMode) << "Status" << status << "NormalMode"<< temporary_init_Counter;
@@ -458,18 +473,33 @@ bool USB2CAN_driver::initSend(){
                 }
                 initListTimer->start(initTimerDelay);
             break;
-            case 12:              //10-Set Normal Mode
+            case 12:              //10-Set Mode register [0x00], the value depends on Message Filter   (by WriteReg[x12])
                 while(!port_USB2CAN->waitForBytesWritten(waitForBytesWritten)){
                     status = port_USB2CAN->write(ModRegDat,5);
                     qDebug() << "TX:" << QString::fromLocal8Bit(ModRegDat) << "Status" << status << "ModRegDat - final"<< temporary_init_Counter;
                 }
-                activeInit = false;
                 initListTimer->start(initTimerDelay);
             break;
 
-            case 13:              //End of Initialize sub-routine
-                qDebug() << "Succesfull initialization";
-
+            case 13:
+            qDebug() <<counter_typeOfMode << "Send get mode";
+                Get_Mode();
+                //activeInit = false;
+                if(counter_typeOfMode > 4){
+                    activeInit = false;
+                    temporary_init_Counter = 15;
+                }
+                else{
+                    counter_typeOfMode++;
+                }
+                initListTimer->start(1500);
+            break;
+            case 14:              //End of Initialize sub-routine
+                qDebug() << "Succesfull initialization" << "after repetetion: "<< counter_typeOfMode;
+                return false;
+            break;
+            case 15:              //End of Initialize sub-routine
+                qDebug() << "Unsuccesfull initialization, the manualy set normal mode is neccesary" ;
                 return false;
             break;
             default:
@@ -478,14 +508,15 @@ bool USB2CAN_driver::initSend(){
             break;
         }
 
-        if(temporary_init_Counter == 13){
+        if(temporary_init_Counter == 14){
             temporary_init_Counter = 0;
+            counter_typeOfMode = 0;
             activeInit = false;
             init_send_stop = true;
             initListTimer->stop();
             QObject::disconnect(initListTimer);
         }
-        else{
+        else if(temporary_init_Counter <= 14 && temporary_init_Counter != 13){
             temporary_init_Counter++;
         }
 

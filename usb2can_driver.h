@@ -30,6 +30,7 @@ public:
     int counter_listCANmsg_slot = 0;
 
     int temporary_init_Counter = 0;
+    int counter_typeOfMode = 0;
     int deinit_Counter = 0;
     int init();
     void deinit();
@@ -42,7 +43,7 @@ public:
     void Config_Mode();
     void Normal_Mode();
     void LoopBack_Mode();
-    QByteArray Get_Mode();
+    void Get_Mode();
 
     void WriteReg(QByteArray regAdress, QByteArray value);
     QByteArray WriteCMD(QByteArray CMD_name, QByteArray value);
