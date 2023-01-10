@@ -32,7 +32,7 @@ private:
     //std::vector<QString> outputTxt;
     QTimer *listSendTimer;
 
-    void menu_sendCommands(QString cmd);
+    void menu_sendCommands(QString cmd,bool list);
 
     //new variable
     int dial_position;
@@ -44,7 +44,6 @@ private slots:
     void on_dataReceived(QByteArray);
     void on_dataReceived(QString);
     void on_timeout_listSendTimer();
-
 
     void on_pushButton_released();
     void on_pushButton_SendBtn_clicked();

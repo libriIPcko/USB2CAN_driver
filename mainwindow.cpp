@@ -120,7 +120,7 @@ void MainWindow::on_pushButton_SendBtn_clicked()
     QString txt = ui->TX_textEdit->toPlainText();
     if((txt.isEmpty() == 0)&&(u2c->port_USB2CAN->isOpen())){
         if(txt.at(0) == '#'){
-            menu_sendCommands(txt.sliced(1));
+            menu_sendCommands(txt.sliced(1),false);
         }
         else{
             //qDebug() << "length: " << u2c->SendHex(QByteArray::fromHex(txt.toLocal8Bit()));
@@ -135,26 +135,31 @@ void MainWindow::on_pushButton_SendBtn_clicked()
 
 
 void MainWindow::on_pushButton_ListSendBtn_released(){
-    QString inputTXT = ui->TX_textEdit->toPlainText();
-    QString outputTxt_string;
-    //find the CR and LF
-    for(int i=0; i < inputTXT.length();i++){
-        if(inputTXT.at(i) == '\n'){
-           //outputTxt.at(pDeque).push_back(inputTXT.at(i));
-           //pDeque++;
-            outputTxt_string.append(inputTXT.at(i));
-            outputTxt.push_back(outputTxt_string);
-            outputTxt_string.clear();
+    if(u2c->port_USB2CAN->isOpen()){
+        QString inputTXT = ui->TX_textEdit->toPlainText();
+        QString outputTxt_string;
+        //find the CR and LF
+        for(int i=0; i < inputTXT.length();i++){
+            if(inputTXT.at(i) == '\n'){
+               //outputTxt.at(pDeque).push_back(inputTXT.at(i));
+               //pDeque++;
+                outputTxt_string.append(inputTXT.at(i));
+                outputTxt.push_back(outputTxt_string);
+                outputTxt_string.clear();
+            }
+            else{
+                outputTxt_string.append(inputTXT.at(i));
+            }
         }
-        else{
-            outputTxt_string.append(inputTXT.at(i));
-        }
+        //RUN timer or Thread
+        //listSendTimer->setInterval(QString::number(ui->lineEdit_lineEdit_timdelaylist->text()));
+        //QString value = ui->lineEdit_lineEdit_timdelaylist->text();
+        listSendTimer->setInterval(ui->lineEdit_lineEdit_timdelaylist->text().toInt());
+        listSendTimer->start();
     }
-    //RUN timer or Thread
-    //listSendTimer->setInterval(QString::number(ui->lineEdit_lineEdit_timdelaylist->text()));
-    //QString value = ui->lineEdit_lineEdit_timdelaylist->text();
-    listSendTimer->setInterval(ui->lineEdit_lineEdit_timdelaylist->text().toInt());
-    listSendTimer->start();
+    else{
+        ui->RX_textEdit->append("The port is not opened");
+    }
 }
 /*
 void MainWindow::..() {
@@ -184,20 +189,32 @@ void MainWindow::on_timeout_listSendTimer(){
     else{
         //u2c->SendHex(QByteArray::fromHex(outputTxt.front().toLocal8Bit()));
         //menu_sendCommands(outputTxt.front().toLocal8Bit().sliced(1));
-        menu_sendCommands(outputTxt.front().toLocal8Bit().sliced(1));
+        menu_sendCommands(outputTxt.front().toLocal8Bit().sliced(1),true);
         outputTxt.pop_front();
     }
+
 }
 
-void MainWindow::menu_sendCommands(QString cmd){
+void MainWindow::menu_sendCommands(QString cmd,bool list){
     //Commands:
     try {
-        if(cmd.sliced(0,3).compare("msg") == 0){
+        if(cmd.sliced(0,3).compare("msg") == 0 && list == false){
             qDebug() << "msg cmd" << cmd << cmd.sliced(3) << QByteArray::fromHex(cmd.sliced(3).toLocal8Bit());
             //hex to char
             //QByteArray test = cmd.sliced(3).toLatin1();
             //u2c->SendHex(QByteArray::fromHex(cmd.sliced(3).toLocal8Bit())); //this argument put to the u2c->writeCANmsg()
             u2c->writeCANmsg(cmd.sliced(3));
+        }
+        else if(cmd.sliced(0,3).compare("msg") == 0 && list == true){
+            qDebug() << "Start list init" << cmd;
+            /*
+            QStringList cmdlist;
+            for(int i=0;i<=(int)outputTxt.size();i++){
+                cmdlist.push_back(outputTxt.at(i));
+            }
+            u2c->listCANmsg(cmdlist,300);
+            */
+            u2c->writeCANmsg(cmd,3);
         }
         else if(cmd.compare("init") == 0){
             qDebug() << "Start init" << cmd;

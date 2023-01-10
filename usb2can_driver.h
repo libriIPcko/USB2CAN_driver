@@ -42,7 +42,7 @@ public:
     void Config_Mode();
     void Normal_Mode();
     void LoopBack_Mode();
-    QByteArray Get_Mode();
+    void Get_Mode();
 
     void WriteReg(QByteArray regAdress, QByteArray value);
     QByteArray WriteCMD(QByteArray CMD_name, QByteArray value);
@@ -50,9 +50,9 @@ public:
     int SendString(QString data);
     int SendHex(QByteArray data);
 
-    int writeCANmsg(QString msg);
     int listCANmsg(QStringList list,int msgDelay);
-    void writeCANmsg(QByteArray msg);
+    int writeCANmsg(QString msg);
+    int writeCANmsg(QString msg, int msg_repetition);
 
     //QString portName;
     int connectToPort(QString portName);
