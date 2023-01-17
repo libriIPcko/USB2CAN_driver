@@ -27,7 +27,7 @@ public:
     QTimer *tim;
     int tim_counter = 0;
     QTimer *ListCANmsgSend = new QTimer();
-    int counter_listCANmsg_slot = 0;
+
 
     int temporary_init_Counter = 0;
     int deinit_Counter = 0;
@@ -50,6 +50,8 @@ public:
     int SendString(QString data);
     int SendHex(QByteArray data);
 
+    QStringList listmsg;
+    int counter_listCANmsg_slot = 0;
     int listCANmsg(QStringList list,int msgDelay);
     int writeCANmsg(QString msg);
     int writeCANmsg(QString msg, int msg_repetition);
@@ -71,7 +73,9 @@ public:
     //@ 1 - QByteArray
     //@ 2 - QString
     int whatReceiveDataType();
-
+    void setRepetetionCANmsg(int numOfrepetetion);
+private:
+    int CANmsgRepetetion = 0;
 
 public: signals:
     friend void QIODevice::readyRead();
@@ -88,7 +92,7 @@ private slots:
     bool initSend();
     void initSend_1();
     bool deinitSend();
-    int listCANmsg_slot(QStringList list);
+    void listCANmsg_slot();
 };
 
 #endif // USB2CAN_DRIVER_H

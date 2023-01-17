@@ -311,57 +311,69 @@ int USB2CAN_driver::writeCANmsg(QString msg){
 }
 
 int USB2CAN_driver::writeCANmsg(QString msg, int msg_repetition){
-    for(int actual_msg=0;actual_msg<msg_repetition;actual_msg++){
-        if(msg.at(0) == '/'){
-            msg.remove(0,1);
-            qDebug() << msg;
+
+    if(msg.at(0) == '/'){
+        msg.remove(0,1);
+        qDebug() << msg;
+    }
+    QStringList inDat = msg.split("/");
+    /*
+    if(inDat.at(0).contains("msg")){
+        QString addres;
+        for(int i=2;i<inDat.at(0).length();
+            addres.append(inDat.at(0).at(i));
         }
-        QStringList inDat = msg.split("/");
+            inDat.removeFirst();
 
-        if(inDat.length() < 2){
-            //Giver return = 999;
-            return 999; // BAD syntax
+        for(int i=0;i<inDat.at(0).length();i++){
+            qDebug() << i << inDat.at(i);
         }
+    }
+    */
 
-        bool ok = false;
-        unsigned char prefixRawDat[] = {0x0f,0x40,0x0B}; //This (0x08) is length of data YOU MUST CALCULATE FROM DATA LENGTH
-        unsigned char suffixRawDat[] = {0xD7,0x39};
-        QByteArray prefixDat = QByteArray::fromRawData((char*)prefixRawDat,3);
-        QByteArray suffixDat = QByteArray::fromRawData((char*)suffixRawDat,2);
-        QByteArray outDat;
+    if(inDat.length() < 2){
+        //Giver return = 999;
+        return 999; // BAD syntax
+    }
 
-        QByteArray CAN_DATA = QByteArray::fromHex(inDat.at(1).toLocal8Bit());
-        //Emergency if. If data set of CAN data is odd
-        /*
-        if((inDat.at(2).size()%2 != 0)&&(inDat.at(2) != 1)){
-            return 4;   //The size of CAN data are odd
-        }
-        */
-        //QByteArray length = (int*)CAN_DATA.length();
-        QByteArray length = QByteArray::fromHex(QString("%1").arg(CAN_DATA.length(), 8, 16, QLatin1Char( '0' )).toLocal8Bit());
-        length.remove(0,3);
-        //outDat.append()
-        //qDebug() << "length of data: " << length.size() << length.at(length.size()-1);// << QString(QByteArray::fromHex(length.at(length.length())));
+    bool ok = false;
+    unsigned char prefixRawDat[] = {0x0f,0x40,0x0B}; //This (0x08) is length of data YOU MUST CALCULATE FROM DATA LENGTH
+    unsigned char suffixRawDat[] = {0xD7,0x39};
+    QByteArray prefixDat = QByteArray::fromRawData((char*)prefixRawDat,3);
+    QByteArray suffixDat = QByteArray::fromRawData((char*)suffixRawDat,2);
+    QByteArray outDat;
 
-        outDat.append(prefixDat);
-        //outDat.append(length.at(length.length()-1));
-        outDat.append(length);
+    QByteArray CAN_DATA = QByteArray::fromHex(inDat.at(1).toLocal8Bit());
+    //Emergency if. If data set of CAN data is odd
+    /*
+    if((inDat.at(2).size()%2 != 0)&&(inDat.at(2) != 1)){
+        return 4;   //The size of CAN data are odd
+    }
+    */
+    //QByteArray length = (int*)CAN_DATA.length();
+    QByteArray length = QByteArray::fromHex(QString("%1").arg(CAN_DATA.length(), 8, 16, QLatin1Char( '0' )).toLocal8Bit());
+    length.remove(0,3);
+    //outDat.append()
+    //qDebug() << "length of data: " << length.size() << length.at(length.size()-1);// << QString(QByteArray::fromHex(length.at(length.length())));
 
-        int CAN_ID_dec = inDat.at(0).toUInt(&ok,16);
-        //recalculate CAN_ID
-        CAN_ID_dec = (CAN_ID_dec)/0.03125;
+    outDat.append(prefixDat);
+    //outDat.append(length.at(length.length()-1));
+    outDat.append(length);
 
-        QByteArray CAN_ID = QByteArray::fromHex(QString("%1").arg(CAN_ID_dec, 8, 16, QLatin1Char( '0' )).toLocal8Bit());
-        CAN_ID.remove(0,2);
-        outDat.append(CAN_ID);
+    int CAN_ID_dec = inDat.at(0).toUInt(&ok,16);
+    //recalculate CAN_ID
+    CAN_ID_dec = (CAN_ID_dec)/0.03125;
 
-
-        outDat.append(CAN_DATA);
-        outDat.append(suffixDat);
-        //qDebug() <<CAN_ID_dec << QString(QByteArray::fromHex(outDat));
-        qDebug() <<SendHex(outDat);
+    QByteArray CAN_ID = QByteArray::fromHex(QString("%1").arg(CAN_ID_dec, 8, 16, QLatin1Char( '0' )).toLocal8Bit());
+    CAN_ID.remove(0,2);
+    outDat.append(CAN_ID);
 
 
+    outDat.append(CAN_DATA);
+    outDat.append(suffixDat);
+
+    for(int actual_msg=0;actual_msg <= msg_repetition;actual_msg++){
+        SendHex(outDat);
     }
     return 0;
 }
@@ -576,19 +588,26 @@ void USB2CAN_driver::initSend_1(){
 
 int  USB2CAN_driver::listCANmsg(QStringList list,int msgDelay){
     //writeCANmsg();
+    listmsg = list;
+    qDebug() << "Connection of listCANmsg_slot :" << connect(ListCANmsgSend,SIGNAL(timeout()),this,SLOT(listCANmsg_slot()));
     ListCANmsgSend->setInterval(msgDelay);
-    connect(ListCANmsgSend,SIGNAL(timeout()),this,SLOT(listCANmsg_slot(list)));
     ListCANmsgSend->start();
 }
 
-int USB2CAN_driver::listCANmsg_slot(QStringList list){
+void USB2CAN_driver::listCANmsg_slot(){
     ListCANmsgSend->stop();
-    if(counter_listCANmsg_slot > list.length()){
+    if(counter_listCANmsg_slot >= listmsg.size()){
         counter_listCANmsg_slot = 0;
-        return 0;
+        //return 0;
     }
-    writeCANmsg(list.at(counter_listCANmsg_slot),2);
-    ListCANmsgSend->start();
+    else{
+        ListCANmsgSend->start();
+    }
+    qDebug() << counter_listCANmsg_slot << writeCANmsg(listmsg.at(counter_listCANmsg_slot),CANmsgRepetetion);
     counter_listCANmsg_slot++;
-    return counter_listCANmsg_slot;
+    //return counter_listCANmsg_slot;
+}
+
+void USB2CAN_driver::setRepetetionCANmsg(int numOfrepetetion){
+    USB2CAN_driver::CANmsgRepetetion = numOfrepetetion;
 }

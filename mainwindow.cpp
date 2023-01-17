@@ -214,7 +214,7 @@ void MainWindow::menu_sendCommands(QString cmd,bool list){
             }
             u2c->listCANmsg(cmdlist,300);
             */
-            u2c->writeCANmsg(cmd,3);
+            u2c->writeCANmsg(cmd.sliced(3),2);
         }
         else if(cmd.compare("init") == 0){
             qDebug() << "Start init" << cmd;
@@ -343,17 +343,33 @@ void MainWindow::on_radioButton_toggled(bool checked)
         QString switch_ON_4 =  "2B4060000F";
         QString operation_mode_5 = "2B4060000F";
 
+        QList<QString> activation_list;
+        QString start       =   ID_+"/"+start_1;
+        activation_list.push_back(start);
+        QString sw_Off      =   ID_PPmode+"/"+switch_OFF_2;
+        activation_list.push_back(sw_Off);
+        QString ready_mode  =   ID_PPmode+"/"+ready_mode_3;
+        activation_list.push_back(ready_mode);
+        QString sw_On       =   ID_PPmode+"/"+switch_ON_4;
+        activation_list.push_back(sw_On);
+        QString op_mode     =   ID_PPmode+"/"+operation_mode_5;
+        activation_list.push_back(op_mode);
+
+
+        /*
         QString activation_array[5] = {ID_PPmode+"/"+start_1,
                                        ID_+"/"+switch_OFF_2,
                                        ID_+"/"+ready_mode_3,
                                        ID_+"/"+switch_ON_4,
                                        ID_+"/"+operation_mode_5};
 
-        //ui->dial_position.
-        for(int i = 0;i<=4;i++){
-            qDebug() << activation_array[i];
-            u2c->writeCANmsg(activation_array[i]);  //writeCANmsg list send add to the driver class
+        //QStringList activation_list;
+        for(int i=0;i <= 5;i++){
+            //activation_list.push_back(activation_array->push_front());
         }
+        */
+        u2c->setRepetetionCANmsg(2);
+        u2c->listCANmsg(activation_list,200);
     }
     else{
         ui->dial_position->setVisible(checked);
